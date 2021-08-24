@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+import 'package:provider/provider.dart';
+
+import './views/screens/product_overview_screen.dart';
+import 'models/providers/products.dart';
+import 'views/screens/product_details_screen.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -9,33 +15,24 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Shop App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(title: 'Home Page'),
-    );
-  }
-}
+    return ChangeNotifierProvider(
+      create: (_) => Products(),
+      // builder: (context, _) => Products(),
+      child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Shop App',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          initialRoute: '/',
+          routes: {
+            '/': (ctx) => ProductOverviewScreen(),
+            ProductDetailsScreen.routeName: (ctx) =>
+                const ProductDetailsScreen(),
+          }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: const Center(child: Text('app')),
+          // home: ProductOverviewScreen(),
+          ),
     );
   }
 }
