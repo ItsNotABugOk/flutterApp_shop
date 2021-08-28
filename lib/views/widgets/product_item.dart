@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shop/models/providers/cart.dart';
+import 'package:shop/models/providers/product.dart';
 import 'package:shop/views/screens/product_details_screen.dart';
 
+// ignore: use_key_in_widget_constructors
 class ProductItem extends StatelessWidget {
-  final String id;
-  final String title;
-  final String imageUrl;
-
-  // ignore: use_key_in_widget_constructors
-  const ProductItem(this.id, this.title, this.imageUrl);
-
   @override
   Widget build(BuildContext context) {
+    final product = Provider.of<Product>(context);
+    final carts = Provider.of<Carts>(context, listen: false);
+
     return ClipRRect(
       borderRadius: const BorderRadius.only(
         bottomRight: Radius.circular(15),
@@ -19,28 +19,28 @@ class ProductItem extends StatelessWidget {
       child: GridTile(
         child: GestureDetector(
           onTap: () {
-            Navigator.of(context)
-                .pushNamed(ProductDetailsScreen.routeName, arguments: id);
+            Navigator.of(context).pushNamed(ProductDetailsScreen.routeName,
+                arguments: product.id);
           },
           child: Image.network(
-            imageUrl,
+            product.imageUrl,
             fit: BoxFit.cover,
           ),
         ),
         footer: GridTileBar(
           leading: Padding(
-            padding: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.only(bottom: 0),
             child: IconButton(
-              onPressed: () {},
-              icon: IconButton(
-                icon: const Icon(Icons.favorite),
-                onPressed: () {},
-              ),
+              icon: Icon(
+                  product.favourite ? Icons.favorite : Icons.favorite_border),
+              onPressed: () {
+                product.toggleFavoutiteProduct();
+              },
             ),
           ),
           backgroundColor: Colors.black54,
           title: Text(
-            title,
+            product.title,
             textScaleFactor: .8,
             overflow: TextOverflow.fade,
             textAlign: TextAlign.center,
@@ -48,11 +48,10 @@ class ProductItem extends StatelessWidget {
           trailing: Padding(
             padding: const EdgeInsets.only(bottom: 23),
             child: IconButton(
-              onPressed: () {},
-              icon: IconButton(
-                icon: const Icon(Icons.shopping_cart),
-                onPressed: () {},
-              ),
+              icon: const Icon(Icons.shopping_cart),
+              onPressed: () {
+                carts.addItem(product.id, product.title, product.price);
+              },
             ),
           ),
         ),
