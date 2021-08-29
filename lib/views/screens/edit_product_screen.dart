@@ -46,16 +46,27 @@ class _EditProductScreenState extends State<EditProductScreen> {
   @override
   void didChangeDependencies() {
     if (_runOneTime) {
-      productId = ModalRoute.of(context)!.settings.arguments as String;
-      _existingProduct =
-          Provider.of<Products>(context).findProductById(productId!);
-      _initialValues = {
-        'title': _existingProduct.title,
-        'descripion': _existingProduct.description,
-        'price': _existingProduct.price.toString(),
-        'imageUrl': '',
-      };
-      _imageController.text = _existingProduct.imageUrl;
+      try {
+        var _args = ModalRoute.of(context)!.settings.arguments;
+        if (_args != null) {
+          productId = _args as String;
+        }
+
+        _existingProduct =
+            Provider.of<Products>(context).findProductById(productId!);
+        _initialValues = {
+          'title': _existingProduct.title,
+          'descripion': _existingProduct.description,
+          'price': _existingProduct.price.toString(),
+          'imageUrl': '',
+        };
+        _imageController.text = _existingProduct.imageUrl;
+      } finally {
+        super.didChangeDependencies();
+        _runOneTime = false;
+        // ignore: control_flow_in_finally
+        return;
+      }
     }
     super.didChangeDependencies();
     _runOneTime = false;
@@ -63,13 +74,13 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
   @override
   void dispose() {
+    _imageNode.removeListener(_updateImageUrl);
     _priceNode.dispose();
     _titleNode.dispose();
     _descriptionNode.dispose();
     _imageController.dispose();
     _imageNode.dispose();
-    _imageNode.removeListener(_updateImageUrl);
-    _imageController.dispose();
+
     super.dispose();
   }
 
