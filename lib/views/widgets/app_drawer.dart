@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:shop/views/screens/edit_product_screen.dart';
+
 import 'package:shop/views/screens/orders_screen.dart';
 import 'package:shop/views/screens/product_overview_screen.dart';
+import 'package:shop/views/screens/user_product_screen.dart';
 
 class MyAppDrawer extends StatelessWidget {
   const MyAppDrawer({Key? key}) : super(key: key);
@@ -29,11 +30,21 @@ class MyAppDrawer extends StatelessWidget {
               Navigator.popAndPushNamed(context, OrdersScreen.routeName);
             },
           ),
+          // ListTile(
+          //   leading: const Icon(Icons.edit),
+          //   title: const Text('Edit Screen'),
+          //   onTap: () {
+          //     Navigator.popAndPushNamed(
+          //       context,
+          //       EditProductScreen.routeName,
+          //     );
+          //   },
+          // ),
           ListTile(
-            leading: const Icon(Icons.edit),
-            title: const Text('Edit Screen'),
+            leading: const Icon(Icons.access_alarm),
+            title: const Text('User Products Screen'),
             onTap: () {
-              Navigator.popAndPushNamed(context, EditProductScreen.routeName);
+              Navigator.popAndPushNamed(context, UserProductScreen.routeName);
             },
           ),
         ],
