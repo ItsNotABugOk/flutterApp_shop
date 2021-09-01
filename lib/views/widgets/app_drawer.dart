@@ -42,9 +42,12 @@ class MyAppDrawer extends StatelessWidget {
             //     );
             //   },
             // ),
+
             ListTile(
               leading: const Icon(Icons.access_alarm),
-              title: const Text('User Products Screen'),
+              title: const Text(
+                'User Products Screen',
+              ),
               onTap: () {
                 Navigator.popAndPushNamed(context, UserProductScreen.routeName);
               },

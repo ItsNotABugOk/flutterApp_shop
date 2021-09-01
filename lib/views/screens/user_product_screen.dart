@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'package:shop/models/providers/products.dart';
 import 'package:shop/views/screens/edit_product_screen.dart';
+import 'package:shop/views/widgets/app_drawer.dart';
 import 'package:shop/views/widgets/user_product_item.dart';
 
 class UserProductScreen extends StatelessWidget {
@@ -27,12 +28,20 @@ class UserProductScreen extends StatelessWidget {
             )
           ],
         ),
-        body: ListView.builder(
-          itemCount: productData.items.length,
-          itemBuilder: (context, index) => UserProductItem(
-              productData.items[index].id,
-              productData.items[index].title,
-              productData.items[index].imageUrl),
+        // drawer: const MyAppDrawer(),
+        body: RefreshIndicator(
+          onRefresh: () => _refereshProducts(context),
+          child: ListView.builder(
+            itemCount: productData.items.length,
+            itemBuilder: (context, index) => UserProductItem(
+                productData.items[index].id,
+                productData.items[index].title,
+                productData.items[index].imageUrl),
+          ),
         ));
   }
+}
+
+Future<void> _refereshProducts(BuildContext context) async {
+  await Provider.of<Products>(context, listen: false).fetshAndSetProdcts();
 }
