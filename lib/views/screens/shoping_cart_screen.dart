@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop/models/providers/cart.dart';
 import 'package:shop/models/providers/orders.dart';
-import 'package:shop/views/screens/orders_screen.dart';
 import 'package:shop/views/widgets/app_drawer.dart';
 import 'package:shop/views/widgets/cart_item.dart' as ci;
 
@@ -42,15 +41,7 @@ class CartScreen extends StatelessWidget {
                       label: Text('\$ ${cart.totalPrice.toStringAsFixed(2)}'),
                       backgroundColor: Colors.lightBlue,
                     ),
-                    TextButton(
-                      child: const Text('Order Now'),
-                      onPressed: () {
-                        Provider.of<Orders>(context, listen: false).addOrder(
-                            cart.items.values.toList(), cart.totalPrice);
-                        cart.placeOrder();
-                        Navigator.of(context).pushNamed(OrdersScreen.routeName);
-                      },
-                    )
+                    OrderButton(cart: cart)
                   ],
                 ),
               ),
@@ -72,6 +63,45 @@ class CartScreen extends StatelessWidget {
           )
         ],
       ),
+    );
+  }
+}
+
+class OrderButton extends StatefulWidget {
+  const OrderButton({
+    Key? key,
+    required this.cart,
+  }) : super(key: key);
+
+  final Carts cart;
+
+  @override
+  State<OrderButton> createState() => _OrderButtonState();
+}
+
+class _OrderButtonState extends State<OrderButton> {
+  var _isLoading = false;
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      child: _isLoading
+          ? const CircularProgressIndicator()
+          : const Text('Order Now'),
+      onPressed: widget.cart.items.isEmpty
+          ? null
+          : () async {
+              setState(() {
+                _isLoading = true;
+              });
+              await Provider.of<Orders>(context, listen: false).addOrder(
+                  widget.cart.items.values.toList(), widget.cart.totalPrice);
+              setState(() {
+                _isLoading = false;
+              });
+              widget.cart.placeOrder();
+
+              // Navigator.of(context).pushNamed(OrdersScreen.routeName);
+            },
     );
   }
 }

@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -53,12 +55,13 @@ class Products with ChangeNotifier {
 
   Future<void> fetshAndSetProdcts() async {
     var url = Uri.parse(
-        'https://online-shop-b64c2-default-rtdb.firebaseio.com/product/.json');
+        'https://online-shop-b64c2-default-rtdb.firebaseio.com/products.json');
     try {
       final response = await http.get(url);
-      final extracterData = json.decode(response.body) as Map<String, dynamic>;
+      final Map<String, dynamic>? extracterData = json.decode(response.body);
+      print(extracterData);
       final List<Product> loadedProducts = [];
-      extracterData.forEach((prodId, prodvalue) {
+      extracterData!.forEach((prodId, prodvalue) {
         loadedProducts.add(
           Product(
             id: prodId,
@@ -66,17 +69,23 @@ class Products with ChangeNotifier {
             description: prodvalue['description'],
             price: prodvalue['price'],
             imageUrl: prodvalue['imageUrl'],
+            favourite: prodvalue['isFavourite'],
           ),
         );
       });
+
+      print(loadedProducts[1]);
+
       _items = loadedProducts;
       notifyListeners();
-    } catch (_) {}
+    } catch (error) {
+      rethrow;
+    }
   }
 
   Future<void> addProduct(Product newProduct) async {
     var url = Uri.parse(
-        'https://online-shop-b64c2-default-rtdb.firebaseio.com/product/.json');
+        'https://online-shop-b64c2-default-rtdb.firebaseio.com/products.json');
     try {
       final reponse = await http.Client().post(
         url,
@@ -93,6 +102,7 @@ class Products with ChangeNotifier {
         title: newProduct.title,
         description: newProduct.description,
         price: newProduct.price,
+        favourite: newProduct.favourite,
         imageUrl: newProduct.imageUrl,
       );
       _items.add(newP);
@@ -108,7 +118,7 @@ class Products with ChangeNotifier {
     var index = _items.indexWhere((element) => element.id == productId);
     if (index >= 0) {
       var url = Uri.parse(
-          'https://online-shop-b64c2-default-rtdb.firebaseio.com/product/$productId.json');
+          'https://online-shop-b64c2-default-rtdb.firebaseio.com/products/$productId.json');
       await http.Client().put(
         url,
         body: json.encode({
@@ -126,7 +136,7 @@ class Products with ChangeNotifier {
 
   Future<void> deleteProduct(String id) async {
     var url = Uri.parse(
-        'https://online-shop-b64c2-default-rtdb.firebaseio.com/product/$id.jn');
+        'https://online-shop-b64c2-default-rtdb.firebaseio.com/products/$id.json');
     var existingItemIndex = _items.indexWhere((prod) => prod.id == id);
     Product? existingItem = _items[existingItemIndex];
     _items.removeAt(existingItemIndex);

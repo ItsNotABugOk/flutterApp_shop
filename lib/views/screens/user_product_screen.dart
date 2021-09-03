@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'package:shop/models/providers/products.dart';
 import 'package:shop/views/screens/edit_product_screen.dart';
+// ignore: unused_import
 import 'package:shop/views/widgets/app_drawer.dart';
 import 'package:shop/views/widgets/user_product_item.dart';
 
