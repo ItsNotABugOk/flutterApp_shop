@@ -18,24 +18,22 @@ class ProductOverviewScreen extends StatefulWidget {
 class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
   final List<Product> loadedProducts = [];
   var _favourites = false;
-  var _inIt = true;
-  var _isLoading = false;
 
-  @override
-  void didChangeDependencies() {
-    if (_inIt) {
-      setState(() {
-        _isLoading = true;
-      });
-      Provider.of<Products>(context).fetshAndSetProdcts().then((_) {
-        setState(() {
-          _isLoading = false;
-        });
-      });
-    }
-    _inIt = false;
-    super.didChangeDependencies();
-  }
+  // @override
+  // void didChangeDependencies() {
+  //   if (_inIt) {
+  //     setState(() {
+  //       _isLoading = true;
+  //     });
+  //     Provider.of<Products>(context).fetshAndSetProdcts().then((_) {
+  //       setState(() {
+  //         _isLoading = false;
+  //       });
+  //     });
+  //   }
+  //   _inIt = false;
+  //   super.didChangeDependencies();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -74,13 +72,31 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
       ),
       drawer: const MyAppDrawer(),
       body: Padding(
-        padding: const EdgeInsets.only(top: 5, bottom: 5, left: 3, right: 3),
-        child: _isLoading
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : ProductGridView(_favourites),
-      ),
+          padding: const EdgeInsets.only(top: 5, bottom: 5, left: 3, right: 3),
+          child: FutureBuilder(
+            future: Provider.of<Products>(context, listen: false)
+                .fetshAndSetProdcts(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              if (snapshot.error != null) {
+                return const Center(
+                  child: Text('No Products Added Yet Add Some'),
+                );
+              } else {
+                return ProductGridView(_favourites);
+              }
+            },
+          )
+          //  _isLoading
+          //     ? const Center(
+          //         child: CircularProgressIndicator(),
+          //       )
+          //     : ProductGridView(_favourites),
+          ),
     );
   }
 }
