@@ -74,8 +74,10 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
       body: Padding(
           padding: const EdgeInsets.only(top: 5, bottom: 5, left: 3, right: 3),
           child: FutureBuilder(
-            future: Provider.of<Products>(context, listen: false)
-                .fetshAndSetProdcts(),
+            future: context.read<Products>().fetshAndSetProdcts(),
+
+            // future: Provider.of<Products>(context, listen: false)
+            //     .fetshAndSetProdcts(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(

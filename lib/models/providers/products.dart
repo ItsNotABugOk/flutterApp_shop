@@ -44,6 +44,10 @@ class Products with ChangeNotifier {
     //         'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
     //   ),
   ];
+  final String? authToken;
+  final String? userId;
+
+  Products(this.authToken, this.userId, this._items);
 
   List<Product> get items {
     return [..._items];
@@ -55,13 +59,18 @@ class Products with ChangeNotifier {
 
   Future<void> fetshAndSetProdcts() async {
     var url = Uri.parse(
-        'https://online-shop-b64c2-default-rtdb.firebaseio.com/products.json');
+        'https://online-shop-b64c2-default-rtdb.firebaseio.com/products.json?auth=$authToken');
+    var url1 = Uri.parse(
+        'https://online-shop-b64c2-default-rtdb.firebaseio.com/userFavourites/$userId.json?auth=$authToken');
     try {
       final response = await http.get(url);
-      final Map<String, dynamic>? extracterData = json.decode(response.body);
-      print(extracterData);
+      final Map<String, dynamic> extracterData = json.decode(response.body);
+
+      final favResponse = await http.get(url1);
+      final favoriteData = json.decode(favResponse.body);
+
       final List<Product> loadedProducts = [];
-      extracterData!.forEach((prodId, prodvalue) {
+      extracterData.forEach((prodId, prodvalue) {
         loadedProducts.add(
           Product(
             id: prodId,
@@ -69,12 +78,13 @@ class Products with ChangeNotifier {
             description: prodvalue['description'],
             price: prodvalue['price'],
             imageUrl: prodvalue['imageUrl'],
-            favourite: prodvalue['isFavourite'],
+            favourite:
+                favoriteData == null ? false : favoriteData[prodId] ?? false,
           ),
         );
       });
 
-      print(loadedProducts[1]);
+      // print(loadedProducts[0]);
 
       _items = loadedProducts;
       notifyListeners();
@@ -85,7 +95,7 @@ class Products with ChangeNotifier {
 
   Future<void> addProduct(Product newProduct) async {
     var url = Uri.parse(
-        'https://online-shop-b64c2-default-rtdb.firebaseio.com/products.json');
+        'https://online-shop-b64c2-default-rtdb.firebaseio.com/products.json?auth=$authToken');
     try {
       final reponse = await http.Client().post(
         url,
@@ -93,7 +103,7 @@ class Products with ChangeNotifier {
           'title': newProduct.title,
           'description': newProduct.description,
           'price': newProduct.price,
-          'isFavourite': newProduct.favourite,
+          // 'isFavourite': newProduct.favourite,
           'imageUrl': newProduct.imageUrl,
         }),
       );
@@ -102,13 +112,12 @@ class Products with ChangeNotifier {
         title: newProduct.title,
         description: newProduct.description,
         price: newProduct.price,
-        favourite: newProduct.favourite,
+        // favourite: newProduct.favourite,
         imageUrl: newProduct.imageUrl,
       );
       _items.add(newP);
       notifyListeners();
     } catch (error) {
-      // ignore: avoid_print
       print(' My Own Print  @@####%%%%%%%%%()  ${error.toString()}');
       rethrow;
     }
@@ -118,7 +127,7 @@ class Products with ChangeNotifier {
     var index = _items.indexWhere((element) => element.id == productId);
     if (index >= 0) {
       var url = Uri.parse(
-          'https://online-shop-b64c2-default-rtdb.firebaseio.com/products/$productId.json');
+          'https://online-shop-b64c2-default-rtdb.firebaseio.com/products/$productId.json?auth=$authToken');
       await http.Client().put(
         url,
         body: json.encode({
@@ -136,7 +145,7 @@ class Products with ChangeNotifier {
 
   Future<void> deleteProduct(String id) async {
     var url = Uri.parse(
-        'https://online-shop-b64c2-default-rtdb.firebaseio.com/products/$id.json');
+        'https://online-shop-b64c2-default-rtdb.firebaseio.com/products/$id.json?auth=$authToken');
     var existingItemIndex = _items.indexWhere((prod) => prod.id == id);
     Product? existingItem = _items[existingItemIndex];
     _items.removeAt(existingItemIndex);
