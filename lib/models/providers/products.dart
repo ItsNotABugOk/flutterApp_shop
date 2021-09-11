@@ -57,16 +57,18 @@ class Products with ChangeNotifier {
     return _items.firstWhere((element) => element.id == id);
   }
 
-  Future<void> fetshAndSetProdcts() async {
+  Future<void> fetshAndSetProdcts([bool filterByUser = false]) async {
+    final filterString =
+        filterByUser ? 'orderBy="creatorId"&equalTo="$userId"' : '';
     var url = Uri.parse(
-        'https://online-shop-b64c2-default-rtdb.firebaseio.com/products.json?auth=$authToken');
-    var url1 = Uri.parse(
-        'https://online-shop-b64c2-default-rtdb.firebaseio.com/userFavourites/$userId.json?auth=$authToken');
+        'https://online-shop-b64c2-default-rtdb.firebaseio.com/products.json?auth=$authToken&$filterString');
     try {
       final response = await http.get(url);
       final Map<String, dynamic> extracterData = json.decode(response.body);
+      url = Uri.parse(
+          'https://online-shop-b64c2-default-rtdb.firebaseio.com/userFavourites/$userId.json?auth=$authToken');
 
-      final favResponse = await http.get(url1);
+      final favResponse = await http.get(url);
       final favoriteData = json.decode(favResponse.body);
 
       final List<Product> loadedProducts = [];
@@ -103,8 +105,8 @@ class Products with ChangeNotifier {
           'title': newProduct.title,
           'description': newProduct.description,
           'price': newProduct.price,
-          // 'isFavourite': newProduct.favourite,
           'imageUrl': newProduct.imageUrl,
+          'creatorId': userId
         }),
       );
       Product newP = Product(
@@ -112,7 +114,6 @@ class Products with ChangeNotifier {
         title: newProduct.title,
         description: newProduct.description,
         price: newProduct.price,
-        // favourite: newProduct.favourite,
         imageUrl: newProduct.imageUrl,
       );
       _items.add(newP);
@@ -128,7 +129,7 @@ class Products with ChangeNotifier {
     if (index >= 0) {
       var url = Uri.parse(
           'https://online-shop-b64c2-default-rtdb.firebaseio.com/products/$productId.json?auth=$authToken');
-      await http.Client().put(
+      await http.put(
         url,
         body: json.encode({
           'title': existingProduct.title,

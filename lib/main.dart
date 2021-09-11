@@ -30,15 +30,15 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProxyProvider<Auth, Products>(
           create: (context) => Products('', '', []),
           update: (context, auth, previous) =>
-              Products(auth.token!, auth.userId!, previous!.items),
+              Products(auth.token, auth.userId, previous!.items),
         ),
         ChangeNotifierProvider.value(
           value: Carts(),
         ),
         ChangeNotifierProxyProvider<Auth, Orders>(
-          create: (context) => Orders('', []),
-          update: (context, value, previous) =>
-              Orders(value.token!, previous!.ordersList),
+          create: (context) => Orders('', '', []),
+          update: (context, auth, previous) =>
+              Orders(auth.token, auth.userId, previous!.ordersList),
         ),
       ],
       child: Consumer<Auth>(
@@ -48,10 +48,15 @@ class MyApp extends StatelessWidget {
             theme: ThemeData(
               primarySwatch: Colors.blue,
             ),
-            // initialRoute: auth.isAuth ? ProductOverviewScreen.routeName : '/',
             home: auth.isAuth
                 ? const ProductOverviewScreen()
-                : const AuthScreen(),
+                : FutureBuilder(
+                    future: auth.tryAutoLogin(),
+                    builder: (ctx, snapshot) =>
+                        snapshot.connectionState == ConnectionState.waiting
+                            ? const Center(child: CircularProgressIndicator())
+                            : const AuthScreen(),
+                  ),
             routes: {
               ProductOverviewScreen.routeName: (ctx) =>
                   const ProductOverviewScreen(),

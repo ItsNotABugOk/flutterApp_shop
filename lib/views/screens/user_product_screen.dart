@@ -13,7 +13,7 @@ class UserProductScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final productData = Provider.of<Products>(context);
+    // final productData = Provider.of<Products>(context);
     return Scaffold(
         appBar: AppBar(
           title: const Text('Your Products'),
@@ -29,20 +29,30 @@ class UserProductScreen extends StatelessWidget {
             )
           ],
         ),
-        // drawer: const MyAppDrawer(),
-        body: RefreshIndicator(
-          onRefresh: () => _refereshProducts(context),
-          child: ListView.builder(
-            itemCount: productData.items.length,
-            itemBuilder: (context, index) => UserProductItem(
-                productData.items[index].id,
-                productData.items[index].title,
-                productData.items[index].imageUrl),
-          ),
+        drawer: const MyAppDrawer(),
+        body: FutureBuilder(
+          future: _refereshProducts(context),
+          builder: (context, snapshot) => snapshot.connectionState ==
+                  ConnectionState.waiting
+              ? const Center(
+                  child: CircularProgressIndicator(),
+                )
+              : RefreshIndicator(
+                  onRefresh: () => _refereshProducts(context),
+                  child: Consumer<Products>(
+                    builder: (context, productData, child) => ListView.builder(
+                      itemCount: productData.items.length,
+                      itemBuilder: (context, index) => UserProductItem(
+                          productData.items[index].id,
+                          productData.items[index].title,
+                          productData.items[index].imageUrl),
+                    ),
+                  ),
+                ),
         ));
   }
 }
 
 Future<void> _refereshProducts(BuildContext context) async {
-  await Provider.of<Products>(context, listen: false).fetshAndSetProdcts();
+  await context.read<Products>().fetshAndSetProdcts(true);
 }
