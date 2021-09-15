@@ -92,34 +92,41 @@ class AuthCard extends StatefulWidget {
 }
 
 AuthMode _authMode = AuthMode.login;
-// AuthMode _authMode = AuthMode.signup;
 
 class _AuthCardState extends State<AuthCard>
     with SingleTickerProviderStateMixin {
-  final _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey();
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
   late AnimationController _animationController;
   late Animation<double> _opacityAnimation;
   late Animation<Size> _heightAnimaion;
+  late Animation<Offset> _slideAnimation;
 
   final Map<String, String> _enteredData = {
     'email': '',
     'password': '',
   };
+
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 300));
     _heightAnimaion = Tween<Size>(
-            begin: const Size(double.infinity, 260),
-            end: const Size(double.infinity, 320))
-        .animate(CurvedAnimation(
-            parent: _animationController, curve: Curves.fastOutSlowIn));
-    // _heightAnimaion.addListener(() => setState(() {}));
+      begin: const Size(double.infinity, 260),
+      end: const Size(double.infinity, 320),
+    ).animate(CurvedAnimation(
+        parent: _animationController, curve: Curves.fastOutSlowIn));
     _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(parent: _animationController, curve: Curves.easeIn));
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
+    );
+    _slideAnimation = Tween<Offset>(
+            begin: const Offset(0.0, -1.5), end: const Offset(0.0, 0.0))
+        .animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
+    );
+    // _heightAnimaion.addListener(() => setState(() {}));
   }
 
   @override
@@ -184,19 +191,25 @@ class _AuthCardState extends State<AuthCard>
                   constraints: BoxConstraints(
                       minHeight: _authMode == AuthMode.signup ? 60 : 0,
                       maxHeight: _authMode == AuthMode.signup ? 120 : 0),
-                  height: _authMode == AuthMode.signup ? 60 : 0,
+                  // height: _authMode == AuthMode.signup ? 60 : 0,
                   child: FadeTransition(
                     opacity: _opacityAnimation,
-                    child: TextFormField(
-                      decoration:
-                          const InputDecoration(labelText: 'Confirm password'),
-                      obscureText: true,
-                      validator: (value) {
-                        if (value != _passwordController.text) {
-                          return 'Password Not Match';
-                        }
-                      },
-                      onChanged: (value) => _formKey.currentState!.validate(),
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: TextFormField(
+                        enabled: _authMode == AuthMode.signup,
+                        decoration: const InputDecoration(
+                            labelText: 'Confirm password'),
+                        obscureText: true,
+                        validator: _authMode == AuthMode.signup
+                            ? (value) {
+                                if (value != _passwordController.text) {
+                                  return 'Password Not Match';
+                                }
+                              }
+                            : null,
+                        onChanged: (value) => _formKey.currentState!.validate(),
+                      ),
                     ),
                   ),
                 ),
@@ -246,6 +259,7 @@ class _AuthCardState extends State<AuthCard>
     if (!_formKey.currentState!.validate()) {
       return;
     }
+
     _formKey.currentState!.save();
     setState(() {
       _isLoading = true;
